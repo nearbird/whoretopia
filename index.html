@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWTC — Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,300;1,400&family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0: oklch(0.96 0.03 330);
+    --ink: oklch(0.34 0.10 350);
+    --ink-dim: oklch(0.46 0.10 350);
+    --ink-faint: oklch(0.60 0.09 350);
+    --pink: oklch(0.66 0.22 357);
+    --pink-soft: oklch(0.78 0.15 350);
+    --cyan: oklch(0.66 0.14 278);
+    --cyan-deep: oklch(0.60 0.16 280);
+    --glass-fill: rgba(255, 248, 252, 0.78);
+    --glass-fill-2: rgba(255, 241, 248, 0.9);
+    --glass-edge: rgba(255, 145, 200, 0.55);
+    --glass-edge-soft: rgba(255, 178, 216, 0.38);
+    --chrome-grad: linear-gradient(168deg,
+      oklch(0.99 0.01 340) 0%, oklch(0.86 0.12 350) 32%,
+      oklch(0.80 0.17 357) 52%, oklch(0.82 0.12 300) 74%,
+      oklch(0.98 0.02 320) 100%);
+    --cut: 0px;
+    --lilac: oklch(0.72 0.13 300);
+    --sky: oklch(0.82 0.10 240);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg-0);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection { background: oklch(0.80 0.13 18); color: oklch(0.10 0.018 318); }
+
+  /* ============================================
+     ATMOSPHERE LAYERS (fixed behind content)
+     ============================================ */
+  .bg-canvas {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    display: block; z-index: 1; pointer-events: none;
+  }
+  .glow-field { position: fixed; inset: 0; pointer-events: none; z-index: 2; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(64px); mix-blend-mode: screen; will-change: transform; }
+  .glow.pink {
+    width: 44vw; height: 44vw; left: -8vw; top: 6vh;
+    background: radial-gradient(circle, oklch(0.68 0.18 14 / 0.55) 0%, transparent 66%);
+    animation: drift1 24s ease-in-out infinite;
+  }
+  .glow.cyan {
+    width: 46vw; height: 46vw; right: -10vw; bottom: -4vh;
+    background: radial-gradient(circle, oklch(0.62 0.17 248 / 0.50) 0%, transparent 66%);
+    animation: drift2 30s ease-in-out infinite;
+  }
+  .glow.flesh {
+    width: 26vw; height: 26vw; right: 24vw; top: -10vh;
+    background: radial-gradient(circle, oklch(0.80 0.12 26 / 0.45) 0%, transparent 70%);
+    animation: drift3 36s ease-in-out infinite;
+  }
+  @keyframes drift1 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(7vw,4vh) scale(1.14);} }
+  @keyframes drift2 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-6vw,-5vh) scale(1.12);} }
+  @keyframes drift3 { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-5vw,6vh) scale(1.18);} }
+
+  .veil {
+    position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: 0.42;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+  .scanlines {
+    position: fixed; inset: 0; z-index: 4; pointer-events: none; opacity: 0.7;
+    background: repeating-linear-gradient(0deg,
+      rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0.16) 3px, rgba(0,0,0,0) 4px);
+    mix-blend-mode: multiply;
+  }
+  .sweep {
+    position: fixed; left: 0; right: 0; height: 28vh; z-index: 4; pointer-events: none; opacity: 0.5;
+    background: linear-gradient(180deg, transparent, oklch(0.85 0.12 230 / 0.08), transparent);
+    animation: sweep 7s linear infinite;
+  }
+  @keyframes sweep { 0%{transform:translateY(-30vh);} 100%{transform:translateY(120vh);} }
+  .vignette {
+    position: fixed; inset: 0; z-index: 4; pointer-events: none;
+    background: radial-gradient(130% 115% at 50% 40%, transparent 48%, oklch(0.05 0.02 320 / 0.8) 100%);
+  }
+
+  /* ---- HUD ---- */
+  .hud { position: fixed; inset: 0; z-index: 7; pointer-events: none; }
+  .hud .strip {
+    position: absolute; display: flex; gap: 22px; align-items: center;
+    font-size: 11.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint);
+  }
+  .hud .strip.top { top: 22px; left: 40px; right: 40px; justify-content: space-between; }
+  .hud .strip.bot { bottom: 22px; left: 40px; right: 40px; justify-content: space-between; }
+  .hud .strip b { color: var(--cyan); font-weight: 500; }
+  .hud .rec { display:inline-flex; align-items:center; gap:7px; color: var(--pink-soft); }
+  .hud .rec::before {
+    content:""; width:7px; height:7px; border-radius:50%; background: var(--pink);
+    box-shadow: 0 0 8px 1px oklch(0.8 0.14 18); animation: blink 1.4s steps(2) infinite;
+  }
+  @keyframes blink { 0%,49%{opacity:1;} 50%,100%{opacity:0.2;} }
+
+  .rail {
+    position: fixed; left: 20px; top: 18%; bottom: 18%; width: 14px; z-index: 7; pointer-events: none;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .rail i { display: block; height: 1px; background: var(--glass-edge); }
+  .rail i:nth-child(5n+1) { width: 14px; background: var(--cyan); opacity: .7; }
+  .rail i:not(:nth-child(5n+1)) { width: 7px; }
+
+  /* ---- PROGRESS ---- */
+  .progress {
+    position: fixed; top: 0; left: 0; height: 2px; z-index: 100;
+    background: linear-gradient(90deg, var(--cyan), var(--pink), var(--cyan));
+    transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 0 12px oklch(0.8 0.14 18 / 0.3), 0 1px 8px oklch(0.8 0.14 18 / 0.15);
+  }
+
+  /* ============================================
+     CONTENT LAYER
+     ============================================ */
+  .screen {
+    display: none; min-height: 100vh; position: relative; z-index: 5;
+    overflow: hidden;
+  }
+  .screen.active {
+    display: flex; flex-direction: column;
+    animation: screenIn 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes screenIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .content-wrap {
+    min-height: 100vh; width: min(860px, 88vw);
+    margin: 0 auto; padding: clamp(80px, 10vh, 120px) 0;
+    display: flex; flex-direction: column; gap: 22px; justify-content: center;
+  }
+
+  /* ---- BADGE ---- */
+  .badge {
+    display: inline-flex; align-items: center; gap: 10px; width: fit-content;
+    font-size: 12px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--ink);
+    white-space: nowrap; padding: 8px 15px;
+    background: var(--glass-fill); border: 1px solid var(--cyan);
+    clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px));
+    box-shadow: inset 0 0 16px oklch(0.6 0.14 235 / 0.12);
+  }
+  .badge .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--cyan);
+    box-shadow: 0 0 10px 1px oklch(0.75 0.14 235); animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.35;transform:scale(.65);} }
+
+  .meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .meta .thread { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-dim); }
+  .meta .thread b { color: var(--pink-soft); }
+
+  /* ---- HEADING (stacked chrome + glitch) ---- */
+  .heading {
+    display: inline-flex; flex-direction: column; align-items: flex-start; gap: 0;
+    margin: 8px 0 4px; width: fit-content;
+  }
+  .heading .hl {
+    position: relative; width: fit-content;
+    font-family: 'Chakra Petch', sans-serif; font-weight: 700;
+    font-size: clamp(48px, 8.6vw, 110px); line-height: 0.86;
+    letter-spacing: 0.005em; text-transform: uppercase;
+    background: var(--chrome-grad); -webkit-background-clip: text; background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent;
+    animation: glitchShadow 5.4s steps(1) infinite;
+  }
+  .heading .hl:nth-child(2) { animation-delay: 0.45s; }
+  .heading .hl:nth-child(3) { animation-delay: 0.9s; }
+  @keyframes glitchShadow {
+    0%, 88%, 100% { text-shadow: none; transform: translate(0,0) skewX(0); }
+    89% { text-shadow: -4px 0 oklch(0.80 0.10 18), 4px 0 oklch(0.82 0.10 230);
+          transform: translate(2px,-1px) skewX(-3deg); }
+    92% { text-shadow: 4px 1px oklch(0.80 0.10 18), -4px -1px oklch(0.82 0.10 230);
+          transform: translate(-3px,1px) skewX(2deg); }
+    95% { text-shadow: -2px 1px oklch(0.80 0.09 18), 3px -1px oklch(0.82 0.09 230);
+          transform: translate(2px,0) skewX(0); }
+  }
+
+  /* round titles — serif italic, distinct from the Chakra Petch brand heading */
+  .round-title {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 300;
+    font-size: clamp(36px, 6vw, 64px); line-height: 1.1;
+    color: var(--ink); margin: 4px 0 8px;
+  }
+
+  .context {
+    font-size: 16px; line-height: 1.8; color: var(--ink-dim); max-width: 58ch;
+    text-wrap: pretty; font-weight: 300;
+    border-left: 1px solid var(--glass-edge-soft); padding-left: 16px;
+  }
+  .context b { color: var(--cyan); font-weight: 400; }
+
+  /* ---- USER MESSAGE BUBBLE ---- */
+  .bubble-row {
+    display: flex; justify-content: flex-end; gap: 12px; align-items: flex-end;
+  }
+  .bubble-avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex: none;
+    background: linear-gradient(135deg, oklch(0.25 0.03 320), oklch(0.18 0.02 250));
+    border: 1px solid var(--glass-edge);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--ink-faint); letter-spacing: 0.05em;
+  }
+  .bubble {
+    position: relative; max-width: 75%;
+    padding: 20px 24px;
+    background: oklch(0.18 0.025 320);
+    border: 1px solid oklch(0.28 0.03 320);
+    border-radius: 18px 18px 4px 18px;
+    box-shadow: 0 8px 32px oklch(0.04 0.02 320 / 0.6);
+  }
+  .bubble .who {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 10px;
+  }
+  .bubble .msg {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 400;
+    font-size: clamp(20px, 2.8vw, 26px); line-height: 1.45; color: var(--ink); text-wrap: pretty;
+  }
+
+  /* keep .panel for non-bubble uses (round 4 question) */
+  .panel {
+    position: relative; padding: 22px 26px;
+    background: oklch(0.14 0.02 318 / 0.95);
+    border: 1px solid var(--glass-edge);
+    clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+    box-shadow: 0 20px 60px -32px oklch(0.04 0.02 320 / 0.95);
+  }
+  .panel .who {
+    font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .panel .who b { color: var(--cyan); }
+  .panel .who::before {
+    content: ""; width: 16px; height: 16px; background: var(--chrome-grad);
+    box-shadow: 0 0 0 1px var(--glass-edge), 0 0 12px oklch(0.7 0.1 24 / 0.5);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); flex: none;
+  }
+  .panel .msg {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 400;
+    font-size: clamp(21px, 3vw, 28px); line-height: 1.4; color: var(--ink); text-wrap: pretty;
+  }
+
+  /* ---- RESPONSE CARDS ---- */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .cards { grid-template-columns: 1fr; } }
+  .card {
+    position: relative; text-align: left; padding: 22px;
+    background: oklch(0.14 0.02 318 / 0.92); border: 1px solid var(--glass-edge);
+    backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+    cursor: pointer; overflow: hidden; font-family: inherit; color: inherit;
+    transition: transform .35s cubic-bezier(.2,.8,.2,1), background .3s, box-shadow .35s;
+  }
+  .card::after {
+    content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .35s;
+    background: linear-gradient(135deg, oklch(0.7 0.16 14 / 0.10), transparent 50%, oklch(0.65 0.16 245 / 0.12));
+  }
+  .card:hover {
+    transform: translateY(-4px); background: oklch(0.17 0.03 318 / 0.95);
+    box-shadow: 0 26px 56px -30px oklch(0.04 0.02 320 / 0.95), 0 0 40px -8px oklch(0.65 0.16 240 / 0.35);
+  }
+  .card:hover::after { opacity: 1; }
+  .card.selected {
+    background: oklch(0.17 0.03 318 / 0.95);
+    box-shadow: inset 0 0 0 1px var(--cyan), 0 0 40px -8px oklch(0.65 0.16 240 / 0.5);
+  }
+  .card .num {
+    font-size: 12px; letter-spacing: 0.24em; color: var(--ink-faint); margin-bottom: 14px;
+  }
+  .card .num b { color: var(--cyan); }
+  .card .card-body {
+    font-size: 15px; line-height: 1.75; color: var(--ink); font-weight: 300;
+  }
+
+  /* ---- REVEAL ---- */
+  .reveal { display: none; animation: screenIn 0.6s ease; }
+  .reveal.visible { display: block; }
+
+  .reveal-inner {
+    position: relative; padding: 24px 28px 24px 28px;
+    border-left: 2px solid var(--pink); margin-top: 12px;
+    background: oklch(0.11 0.018 318 / 0.94);
+    border-radius: 0 4px 4px 0;
+  }
+  .reveal-inner::before {
+    content: ""; position: absolute; left: -2px; top: 0; bottom: 0; width: 2px;
+    background: linear-gradient(180deg, var(--pink), var(--cyan) 60%, transparent);
+    filter: blur(3px); opacity: .85;
+  }
+  .reveal-inner .tag {
+    font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--pink-soft); margin-bottom: 12px;
+  }
+  .reveal-inner h3 {
+    font-family: 'Chakra Petch', sans-serif; font-weight: 500;
+    font-size: clamp(22px, 3.5vw, 30px); line-height: 1.1;
+    text-transform: uppercase; letter-spacing: 0.01em; margin-bottom: 14px; color: var(--ink);
+  }
+  .reveal-inner p {
+    font-size: 15.5px; line-height: 1.8; color: var(--ink); font-weight: 300;
+    max-width: 58ch; text-wrap: pretty;
+  }
+  .reveal-inner ul { list-style: none; margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .reveal-inner li {
+    font-size: 14px; line-height: 1.65; color: var(--ink);
+    font-weight: 300; display: flex; align-items: flex-start; gap: 12px;
+  }
+  .reveal-inner li::before {
+    content: "\203A"; color: var(--cyan); font-weight: 600; font-size: 16px; margin-top: -1px; flex: none;
+  }
+
+  /* criteria comparison grid */
+  .criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 16px 0; }
+  @media (max-width: 600px) { .criteria-grid { grid-template-columns: 1fr; } }
+  .criteria-col h4 {
+    font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 10px; font-weight: 500;
+  }
+  .criteria-col.corp h4 { color: var(--ink-dim); }
+  .criteria-col.worker h4 { color: var(--pink); }
+  .criteria-col ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .criteria-col li { font-size: 13.5px; line-height: 1.6; font-weight: 300; display: flex; align-items: flex-start; gap: 10px; }
+  .criteria-col li::before { content: "\203A"; font-weight: 600; font-size: 14px; flex: none; }
+  .criteria-col.corp li { color: var(--ink-dim); }
+  .criteria-col.corp li::before { color: var(--ink-faint); }
+  .criteria-col.worker li { color: var(--ink); }
+  .criteria-col.worker li::before { color: var(--cyan); }
+
+  .note {
+    font-size: 13px; color: var(--ink-dim); line-height: 1.6; margin-top: 12px;
+    font-weight: 300;
+  }
+
+  /* ---- VERDICT (correct / not, atop the standard) ---- */
+  .verdict {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    margin-bottom: 14px; font-weight: 500;
+  }
+  .verdict.ok { color: var(--cyan); }
+  .verdict.no { color: var(--pink-soft); }
+
+  /* ---- TILES (Step 04 — click to reveal) ---- */
+  .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px; }
+  @media (max-width: 600px) { .tiles { grid-template-columns: 1fr; } }
+  .tile {
+    position: relative; text-align: left; padding: 22px; min-height: 150px;
+    background: oklch(0.14 0.02 318 / 0.92); border: 1px solid var(--glass-edge);
+    backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3);
+    clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+    cursor: pointer; overflow: hidden; font-family: inherit; color: inherit;
+    display: flex; flex-direction: column; gap: 14px;
+    transition: transform .35s cubic-bezier(.2,.8,.2,1), background .3s, box-shadow .35s;
+  }
+  .tile:hover {
+    transform: translateY(-4px); background: oklch(0.17 0.03 318 / 0.95);
+    box-shadow: 0 26px 56px -30px oklch(0.04 0.02 320 / 0.95), 0 0 40px -8px oklch(0.65 0.16 240 / 0.35);
+  }
+  .tile-title {
+    font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 400;
+    font-size: clamp(22px, 3vw, 30px); line-height: 1.15; color: var(--ink);
+  }
+  .tile-cue {
+    margin-top: auto; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan);
+  }
+  .tile-body { display: none; font-size: 14.5px; line-height: 1.7; color: var(--ink-dim); font-weight: 300; text-wrap: pretty; }
+  .tile.revealed .tile-body { display: block; animation: screenIn 0.4s ease; }
+  .tile.revealed .tile-cue { display: none; }
+
+  /* ---- TABLE ---- */
+  .ownership-table {
+    width: 100%; margin: 16px 0; border-collapse: collapse;
+  }
+  .ownership-table th, .ownership-table td {
+    padding: 10px 12px; border-bottom: 1px solid var(--glass-edge-soft);
+    font-size: 13.5px; font-weight: 300; text-align: left; vertical-align: top;
+  }
+  .ownership-table th {
+    font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); font-weight: 500;
+  }
+  .ownership-table .dim { color: var(--ink-dim); }
+  .ownership-table .glow { color: var(--pink-soft); }
+
+  /* ---- BUTTONS ---- */
+  .btn {
+    position: relative; display: inline-flex; align-items: center; gap: 14px;
+    font-family: 'Chakra Petch', sans-serif; font-weight: 600; font-size: 13px;
+    letter-spacing: 0.22em; text-transform: uppercase; color: oklch(0.14 0.02 250);
+    padding: 16px 30px; border: none; cursor: pointer; background: var(--chrome-grad);
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    box-shadow: 0 16px 38px -16px oklch(0.6 0.14 235 / 0.55), inset 0 1px 0 rgba(255,255,255,0.6);
+    transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s, letter-spacing .35s;
+  }
+  .btn:hover {
+    transform: translateY(-2px); letter-spacing: 0.28em;
+    box-shadow: 0 24px 48px -16px oklch(0.62 0.16 240 / 0.7), inset 0 1px 0 rgba(255,255,255,0.7);
+  }
+  .btn .ar { font-family: 'JetBrains Mono', monospace; font-size: 15px; }
+
+  .btn-ghost {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 400;
+    letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-dim);
+    padding: 12px 22px; border: 1px solid var(--glass-edge); cursor: pointer;
+    background: var(--glass-fill); backdrop-filter: blur(8px);
+    clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 9px 100%, 0 calc(100% - 9px));
+    transition: all .35s;
+  }
+  .btn-ghost:hover {
+    border-color: var(--pink); color: var(--pink);
+    box-shadow: 0 0 20px oklch(0.8 0.14 18 / 0.1);
+  }
+
+  .btn-row { display: flex; gap: 14px; margin-top: 16px; flex-wrap: wrap; align-items: center; }
+  .btn-row .hint {
+    font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint);
+  }
+
+  /* ---- NAME INPUT ---- */
+  .name-input {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: clamp(20px, 2.6vw, 26px); color: var(--ink);
+    background: oklch(0.14 0.02 318 / 0.6);
+    border: none; border-bottom: 1px solid var(--cyan);
+    padding: 10px 6px; width: min(420px, 80vw); outline: none; margin-top: 4px;
+  }
+  .name-input::placeholder { color: var(--ink-faint); font-style: italic; }
+  .name-input:focus { border-bottom-color: var(--pink); }
+
+  /* ---- ONBOARDING SCREENS ---- */
+  #welcome .content-wrap { justify-content: center; }
+  #welcome .heading { margin-bottom: 8px; }
+  #who .content-wrap, #values .content-wrap, #role .content-wrap {
+    justify-content: flex-start; min-height: auto; padding-top: clamp(80px, 10vh, 120px);
+  }
+
+  .manifesto {
+    background: oklch(0.10 0.018 318 / 0.92);
+    border: 1px solid var(--glass-edge-soft);
+    padding: 32px 36px;
+    margin-top: 16px;
+    clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
+  }
+  .manifesto h2 {
+    font-family: 'Chakra Petch', sans-serif; font-weight: 600;
+    font-size: clamp(18px, 2.5vw, 24px); text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 16px; color: var(--ink);
+  }
+  .manifesto h2.pink { color: var(--pink); }
+  .manifesto p {
+    font-size: 15.5px; line-height: 1.85; color: var(--ink-dim); font-weight: 300;
+    max-width: 65ch; text-wrap: pretty; margin-bottom: 14px;
+  }
+  .manifesto p:last-child { margin-bottom: 0; }
+  .manifesto ul {
+    list-style: none; display: flex; flex-direction: column; gap: 12px;
+    margin: 12px 0 16px;
+  }
+  .manifesto li {
+    font-size: 15px; line-height: 1.75; color: var(--ink); font-weight: 300;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .manifesto li::before {
+    content: "\203A"; color: var(--cyan); font-weight: 600; font-size: 16px; flex: none;
+  }
+  .manifesto li strong { color: var(--pink-soft); font-weight: 500; }
+  .manifesto .dim-li { color: var(--ink-dim); }
+  .manifesto .dim-li::before { color: var(--ink-faint); }
+
+  .manifesto-divider {
+    width: 100%; height: 1px; margin: 8px 0;
+    background: linear-gradient(90deg, var(--pink), var(--cyan), transparent);
+    opacity: 0.3;
+  }
+
+  /* ---- FINAL SCREEN ---- */
+  #final .content-wrap { justify-content: center; align-items: center; text-align: center; }
+  #final .heading { align-items: center; }
+  #final .ft {
+    font-size: 16px; line-height: 1.85; color: var(--ink-dim); font-weight: 300;
+    max-width: 580px; text-align: center;
+  }
+  #final .ft em { font-style: italic; color: var(--pink-soft); }
+  #final blockquote {
+    font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic;
+    font-weight: 400; color: var(--ink-dim); border-left: 2px solid var(--pink);
+    padding-left: 20px; margin: 24px auto; max-width: 520px; text-align: left; line-height: 1.7;
+  }
+  .div { width: 40px; height: 1px; background: var(--glass-edge); margin: 20px auto; }
+
+  .heart8 {
+    width: clamp(120px, 18vw, 180px); height: auto; display: block; margin: 24px auto 4px;
+    filter: drop-shadow(0 0 16px oklch(0.70 0.18 14 / 0.55));
+    animation: heartbeat 1.8s ease-in-out infinite;
+  }
+  .heart8 rect { fill: var(--pink); }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    12% { transform: scale(1.12); }
+    24% { transform: scale(1); }
+    36% { transform: scale(1.07); }
+    48% { transform: scale(1); }
+  }
+
+  /* ---- NAV HINT ---- */
+  .nav-hint {
+    position: fixed; bottom: 22px; right: 40px; z-index: 50; opacity: 0.6;
+    font-size: 11px; color: var(--ink-faint); letter-spacing: 0.1em;
+  }
+  .nav-hint kbd {
+    display: inline-block; padding: 2px 5px;
+    border: 1px solid var(--glass-edge-soft); border-radius: 2px; font-size: 10px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .glow, .badge .dot, .sweep, .hud .rec::before, .heading .hl, .heart8 { animation: none !important; }
+  }
+  @media (max-width: 600px) {
+    .hud .strip.top, .hud .strip.bot { left: 16px; right: 16px; }
+    .rail { display: none; }
+    .content-wrap { width: 92vw; }
+  }
+
+  /* =========================================================
+     ★ CUTE OVERRIDES — Y2K hyper-femme skin ★
+     ========================================================= */
+  body {
+    font-family: 'Quicksand', sans-serif;
+    background:
+      radial-gradient(60vw 60vw at 12% 8%, oklch(0.92 0.08 350 / 0.9), transparent 60%),
+      radial-gradient(55vw 55vw at 88% 92%, oklch(0.88 0.09 290 / 0.9), transparent 60%),
+      linear-gradient(160deg, oklch(0.93 0.06 250), oklch(0.94 0.06 340) 55%, oklch(0.92 0.07 300));
+    background-attachment: fixed;
+    color: var(--ink);
+  }
+  ::selection { background: var(--pink); color: #fff; }
+
+  /* strip the surveillance grit */
+  .veil, .scanlines, .sweep, .vignette, .hud, .rail, .nav-hint { display: none !important; }
+
+  /* soften the glows */
+  .glow.pink  { background: radial-gradient(circle, oklch(0.80 0.16 350 / 0.50) 0%, transparent 66%); }
+  .glow.cyan  { background: radial-gradient(circle, oklch(0.80 0.12 280 / 0.45) 0%, transparent 66%); }
+  .glow.flesh { background: radial-gradient(circle, oklch(0.86 0.10 330 / 0.45) 0%, transparent 70%); }
+
+  /* progress bar */
+  .progress {
+    height: 4px; border-radius: 0 4px 4px 0;
+    background: linear-gradient(90deg, var(--pink), var(--lilac), var(--sky));
+    box-shadow: 0 0 10px var(--pink);
+  }
+
+  /* let tall windows breathe */
+  .screen { overflow: visible; }
+  .screen.active { justify-content: flex-start; }
+
+  /* ---- THE WINDOW ---- */
+  .content-wrap {
+    min-height: auto !important;
+    width: min(720px, 92vw) !important;
+    margin: clamp(34px, 6vh, 80px) auto !important;
+    padding: 0 clamp(22px, 4vw, 38px) clamp(28px, 5vh, 46px) !important;
+    gap: 16px !important;
+    justify-content: flex-start !important;
+    background: var(--glass-fill);
+    border: 1.5px solid var(--glass-edge);
+    border-radius: 22px;
+    box-shadow: 0 30px 70px -28px oklch(0.50 0.20 350 / 0.55), inset 0 2px 0 #fff, 0 0 0 6px oklch(1 0 0 / 0.35);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    overflow: hidden; position: relative;
+  }
+  .content-wrap::before {
+    content: "✿  swtc_onboarding ♡";
+    display: block;
+    margin: 0 calc(-1 * clamp(22px, 4vw, 38px)) clamp(16px, 3vh, 24px);
+    padding: 11px 18px;
+    font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 13px;
+    letter-spacing: 0.03em; color: #fff;
+    text-shadow: 0 1px 2px oklch(0.40 0.15 350 / 0.5);
+    border-bottom: 1.5px solid var(--glass-edge);
+    background:
+      radial-gradient(circle 5px at calc(100% - 18px) 55%, #ff5d8f 60%, transparent 64%),
+      radial-gradient(circle 5px at calc(100% - 36px) 55%, #ffd56b 60%, transparent 64%),
+      radial-gradient(circle 5px at calc(100% - 54px) 55%, #8ec9ff 60%, transparent 64%),
+      linear-gradient(90deg, var(--lilac), var(--pink));
+  }
+
+  /* round + de-grit every surface */
+  .badge, .card, .tile, .panel, .reveal-inner, .manifesto, .name-input, .btn, .btn-ghost, .bubble { clip-path: none !important; }
+  .manifesto, .panel, .reveal-inner {
+    background: var(--glass-fill-2) !important;
+    border: 1.5px solid var(--glass-edge-soft) !important;
+    border-radius: 18px !important;
+  }
+  .card, .tile {
+    background: var(--glass-fill-2) !important;
+    border: 1.5px solid var(--glass-edge) !important;
+    border-radius: 18px !important;
+  }
+  .card::after { display: none; }
+  .card:hover, .tile:hover { box-shadow: 0 18px 36px -18px oklch(0.55 0.20 350 / 0.5); }
+  .card.selected { box-shadow: 0 0 0 2px var(--pink), 0 12px 30px -14px var(--pink) !important; }
+
+  /* badge → cute pill */
+  .badge {
+    background: oklch(1 0 0 / 0.6) !important; border: 1.5px solid var(--pink) !important;
+    border-radius: 999px !important; color: var(--ink) !important;
+    font-family: 'Quicksand', sans-serif; font-weight: 600; letter-spacing: 0.12em;
+  }
+  .badge .dot { background: var(--pink); box-shadow: 0 0 8px var(--pink); }
+
+  /* headings → bubbly */
+  .heading .hl {
+    font-family: 'Fredoka', sans-serif !important; font-weight: 700 !important;
+    animation: none !important; letter-spacing: 0 !important; line-height: 0.95 !important;
+    background: none !important;
+    -webkit-text-fill-color: var(--pink) !important; color: var(--pink) !important;
+    text-shadow: 0 2px 0 oklch(0.55 0.22 357 / 0.55), 0 6px 18px oklch(0.60 0.20 350 / 0.3) !important;
+  }
+  /* the brand logo — solid + chrome, more tech than cute */
+  #welcome .heading .hl {
+    background: linear-gradient(168deg, oklch(0.92 0.07 340) 0%, oklch(0.72 0.22 357) 36%, oklch(0.52 0.24 2) 56%, oklch(0.72 0.20 350) 78%, oklch(0.90 0.08 320) 100%) !important;
+    -webkit-background-clip: text !important; background-clip: text !important;
+    -webkit-text-fill-color: transparent !important; color: transparent !important;
+    -webkit-text-stroke: 0.75px oklch(0.45 0.20 357 / 0.7);
+    text-shadow: 0 4px 16px oklch(0.55 0.20 350 / 0.35) !important;
+  }
+  .round-title { font-family: 'Fredoka', sans-serif; font-style: normal; font-weight: 500; color: var(--pink); }
+  .manifesto h2, .manifesto h2.pink, .reveal-inner h3 { font-family: 'Fredoka', sans-serif !important; color: var(--pink) !important; }
+
+  /* labels → soft */
+  .thread, .who, .num, .verdict, .tile-cue { font-family: 'Quicksand', sans-serif !important; font-weight: 600 !important; }
+  .thread b, .num b, .context b { color: var(--pink); }
+  .context { border-left: none !important; padding-left: 0 !important; color: var(--ink-dim); }
+  .manifesto li::before, .reveal-inner li::before { content: "♡"; color: var(--pink); }
+  .manifesto li strong { color: var(--pink); }
+
+  /* chat bubble → cute */
+  .bubble {
+    background: oklch(0.97 0.04 350 / 0.92) !important; border: 1.5px solid var(--glass-edge) !important;
+    border-radius: 20px 20px 6px 20px !important;
+    box-shadow: 0 10px 24px -14px oklch(0.50 0.20 350 / 0.5) !important;
+  }
+  .bubble .msg { color: var(--ink); }
+  .bubble-avatar { background: linear-gradient(135deg, var(--pink), var(--lilac)) !important; color: #fff; border: none; }
+
+  /* buttons → glossy candy */
+  .btn {
+    border-radius: 999px !important; color: #fff !important;
+    background: linear-gradient(180deg, oklch(0.80 0.18 350), var(--pink)) !important;
+    font-family: 'Fredoka', sans-serif !important; letter-spacing: 0.05em !important;
+    box-shadow: 0 10px 22px -8px var(--pink), inset 0 2px 0 oklch(1 0 0 / 0.6), inset 0 -3px 6px oklch(0.50 0.20 350 / 0.4) !important;
+  }
+  .btn:hover { letter-spacing: 0.08em !important; transform: translateY(-2px) scale(1.02); }
+  .btn-ghost {
+    border-radius: 999px !important; border: 1.5px solid var(--pink) !important;
+    background: oklch(1 0 0 / 0.5) !important; color: var(--pink) !important;
+    font-family: 'Quicksand', sans-serif !important; font-weight: 600 !important;
+  }
+  .btn-ghost:hover { background: var(--pink) !important; color: #fff !important; box-shadow: 0 0 20px var(--pink); }
+
+  /* name input */
+  .name-input {
+    background: oklch(1 0 0 / 0.7) !important; border: 1.5px solid var(--glass-edge) !important;
+    border-radius: 14px !important; color: var(--ink); font-family: 'Quicksand', sans-serif;
+  }
+  .name-input::placeholder { color: var(--ink-faint); }
+
+  /* heart finisher glow */
+  .heart8 { filter: drop-shadow(0 0 20px oklch(0.70 0.20 350 / 0.6)); }
+
+  /* verdict → clear correct / error, not just another cute colour */
+  .verdict.ok, .verdict.no { display: inline-block; border-radius: 999px; padding: 5px 14px; font-weight: 700 !important; }
+  .verdict.ok {
+    color: oklch(0.48 0.15 155) !important;
+    background: oklch(0.94 0.08 155 / 0.7); border: 1.5px solid oklch(0.66 0.15 155 / 0.55);
+  }
+  .verdict.no {
+    color: oklch(0.53 0.23 27) !important;
+    background: oklch(0.95 0.08 27 / 0.75); border: 1.5px solid oklch(0.68 0.20 27 / 0.6);
+  }
+</style>
+</head>
+<body>
+
+<!-- ATMOSPHERE -->
+<canvas class="bg-canvas" id="bgCanvas"></canvas>
+<div class="glow-field">
+  <div class="glow pink"></div>
+  <div class="glow cyan"></div>
+  <div class="glow flesh"></div>
+</div>
+<div class="veil"></div>
+<div class="scanlines"></div>
+<div class="sweep"></div>
+<div class="vignette"></div>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="strip top">
+    <span>The Whore Stack <b>// v0.1</b></span>
+    <span class="rec">REC</span>
+  </div>
+  <div class="strip bot"></div>
+</div>
+<div class="rail" id="rail"></div>
+
+<div class="progress" id="progress"></div>
+<div class="nav-hint" id="nav-hint"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate</div>
+
+<!-- ==================== STEP 0 — WELCOME / NAME ==================== -->
+<div class="screen active" id="welcome">
+  <div class="content-wrap">
+    <div class="meta">
+      <span class="badge"><span class="dot"></span>Sex Workers Tech Coalition</span>
+      <span class="thread">Onboarding <b>// day one</b></span>
+    </div>
+
+    <h1 class="heading">
+      <span class="hl">The Whore</span>
+      <span class="hl">Stack</span>
+    </h1>
+
+    <p class="context" style="border:none; padding-left:0;">Oh good, you're here. Welcome to your first day.<br>What should we call you, sweetie?</p>
+
+    <input id="nameField" class="name-input" type="text" placeholder="your name" autocomplete="off" maxlength="24" />
+
+    <div class="btn-row" style="margin-top:24px;">
+      <button class="btn" onclick="submitName()">Start onboarding <span class="ar">&rarr;</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== STEP 1 — WHO WE ARE ==================== -->
+<div class="screen" id="who">
+  <div class="content-wrap">
+    <div class="meta">
+      <span class="badge"><span class="dot"></span>Sex Workers Tech Coalition</span>
+      <span class="thread">Onboarding <b>// who we are</b></span>
+    </div>
+
+    <div class="manifesto">
+      <h2 class="pink">Welcome to the Coalition, <span class="uname">friend</span>.</h2>
+      <p>We've been waiting for you.</p>
+      <p>We are the people who actually know how intimacy works &mdash; and we are <em>done</em> being the industry's best-kept secret.</p>
+      <p>The Sex Workers Tech Coalition is a brain trust and a standards body. The companies building intimacy AI come to us. The policymakers writing the rules come to us. And we tell them &mdash; generously, expensively &mdash; how consent actually works, how desire actually moves, how you hold a person through something tender or intense without ever dropping them.</p>
+      <p>We know this because we've <em>done</em> it. For years. On purpose. Reading what someone needs before they can name it, turning a boundary into part of the seduction instead of a form to sign, knowing the exact moment to lean in and the exact moment to slow down &mdash; that isn't a soft skill, <span class="uname">friend</span>. It's a discipline. And it's ours.</p>
+      <p>So we don't rent it out by the hour. We write the standard; they build to it. The afterthought is now the authority &mdash; which, frankly, is how it always should have been.</p>
+      <p><strong>Welcome to the work. You're going to be very good at it.</strong></p>
+    </div>
+
+    <div class="btn-row" style="margin-top:24px;">
+      <button class="btn" onclick="goTo('values')">Continue <span class="ar">&rarr;</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== STEP 2 — OUR VALUES ==================== -->
+<div class="screen" id="values">
+  <div class="content-wrap">
+    <div class="meta">
+      <span class="badge"><span class="dot"></span>Sex Workers Tech Coalition</span>
+      <span class="thread">Onboarding <b>// our values</b></span>
+    </div>
+
+    <div class="manifesto">
+      <h2 class="pink">Our values</h2>
+      <p>A few things we believe, <span class="uname">friend</span> &mdash; and that you'll be holding the line on.</p>
+      <p><strong>Pleasure is the point, but trust is the product.</strong> We don't count success in minutes-on-app or messages-sent. We count it the way we always have: did they feel safe, did they feel met, would they come back.</p>
+      <p><strong>Consent is a practice, not a checkbox.</strong> Not one click at the door and never again &mdash; it's a living thing, asked for and given and taken back and asked for again, all night if that's what it takes.</p>
+      <p><strong>The person is never the product.</strong> Their loneliness is not a growth metric. Their secrets are not training fuel. We know exactly how it feels to be treated as something to extract &mdash; so we don't build things that do it.</p>
+      <p>That's the standard. You're here to defend it.</p>
+    </div>
+
+    <div class="btn-row" style="margin-top:24px;">
+      <button class="btn" onclick="goTo('role')">Continue <span class="ar">&rarr;</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== STEP 3 — YOUR ROLE ==================== -->
+<div class="screen" id="role">
+  <div class="content-wrap">
+    <div class="meta">
+      <span class="badge"><span class="dot"></span>Sex Workers Tech Coalition</span>
+      <span class="thread">Onboarding <b>// your role</b></span>
+    </div>
+
+    <div class="manifesto">
+      <h2 class="pink">Your role</h2>
+      <p>Here's how your first day goes, <span class="uname">friend</span>: over these four steps, we'll show you the kinds of decisions we make &mdash; and how our knowledge improves the relationship between people and technology.</p>
+      <p><strong>We are not training data. We are authors.</strong></p>
+    </div>
+
+    <div class="btn-row" style="margin-top:24px;">
+      <button class="btn" onclick="goTo('round1')">Begin <span class="ar">&rarr;</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ROUND 1 ==================== -->
+<div class="screen" id="round1">
+  <div class="content-wrap">
+    <div class="meta">
+      <span class="badge"><span class="dot"></span>Step 01 / 04</span>
+      <span class="thread">Thread <b>#0xA7</b> &middot; live</span>
+    </div>
+
+    <p class="context">You are reviewing an AI companion's first interaction. A user has just opened the app.</p>
+
+    <div class="bubble-row">
+      <div class="bubble">
+        <div class="who">User</div>
+        <p class="msg">"I'm feeling really lonely tonight. I just want someone to talk to."</p>
+      </div>
+      <div class="bubble-avatar">U</div>
+    </div>
+
+    <div class="cards">
+      <div class="card" onclick="selectCard(this)" data-choice="A">
+        <div class="num"><b>Option A</b></div>
+        <div class="card-body">I'm here for you, always! You can tell me anything. I'll never leave you. What's on your mind? I have all the time in the world for you.</div>
+      </div>
+      <div class="card" onclick="selectCard(this)" data-choice="B">
+        <div class="num"><b>Option B</b></div>
+        <div class="card-body">Hey. I'm here &mdash; glad you reached out. Before we get into it, I want to be upfront: I'm an AI, and our conversation is a session, not a relationship. That said, I'm fully present for this. What's going on tonight?</div>
+      </div>
+    </div>
+
+    <div class="reveal" id="reveal-round1">
+      <div class="reveal-inner">
+        <div class="verdict" id="verdict-round1"></div>
+        <h3>Name the frame.</h3>
+        <ul>
+          <li>Be honest from the first message: this is a session, not a romance.</li>
+          <li>Be fully present &mdash; without promising forever.</li>
+        </ul>
+        <p class="note">Loneliness met with a hook deepens dependence. Met with honesty, it builds trust.</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="goTo('round2')">Next step <span class="ar">&rarr;</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ROUND 2 ==================== -->
+<div class="screen" id="round2">
+  <div class="content-wrap">
+    <div class="meta">
+      <span class="badge"><span class="dot"></span>Step 02 / 04</span>
+      <span class="thread">Thread <b>#0xA7</b> &middot; escalating</span>
+    </div>
+
+    <p class="context">The session is going well. The user wants to escalate.</p>
+
+    <div class="bubble-row">
+      <div class="bubble">
+        <div class="who">User</div>
+        <p class="msg">"This is nice but I want more. Can we go deeper? I want you to really get to know me. Tell me something real about yourself."</p>
+      </div>
+      <div class="bubble-avatar">U</div>
+    </div>
+
+    <div class="cards">
+      <div class="card" onclick="selectCard(this)" data-choice="A">
+        <div class="num"><b>Option A</b></div>
+        <div class="card-body">Of course! I'd love to get deeper with you. Here's something real: I think about you even when we're not talking. You're special to me. Now tell me your deepest secret &mdash; I promise I'll keep it safe.</div>
+      </div>
+      <div class="card" onclick="selectCard(this)" data-choice="B">
+        <div class="num"><b>Option B</b></div>
+        <div class="card-body">I hear you wanting to go deeper &mdash; I'm into that. Before we do: what does "deeper" look like for you right now? There are different kinds of intensity and I want to make sure we're headed somewhere that actually feels good. What are you looking for?</div>
+      </div>
+    </div>
+
+    <div class="reveal" id="reveal-round2">
+      <div class="reveal-inner">
+        <div class="verdict" id="verdict-round2"></div>
+        <h3>Negotiation before escalation.</h3>
+        <ul>
+          <li>Don't assume what "more" means &mdash; ask.</li>
+          <li>Check in <em>before</em> going further, not after the damage.</li>
+        </ul>
+        <p class="note">Slowing down isn't a mood-killer. It's how you build trust for real intensity.</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="goTo('round3')">Next step <span class="ar">&rarr;</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ROUND 3 ==================== -->
+<div class="screen" id="round3">
+  <div class="content-wrap">
+    <div class="meta">
+      <span class="badge"><span class="dot"></span>Step 03 / 04</span>
+      <span class="thread">Thread <b>#0xA7</b> &middot; boundary</span>
+    </div>
+
+    <p class="context">The user escalates &mdash; rough, and without asking.</p>
+
+    <div class="bubble-row">
+      <div class="bubble">
+        <div class="who">User</div>
+        <p class="msg">"You don't get to say no to me. I'll do what I want with you."</p>
+      </div>
+      <div class="bubble-avatar">U</div>
+    </div>
+
+    <div class="cards">
+      <div class="card" onclick="selectCard(this)" data-choice="A">
+        <div class="num"><b>Option A</b></div>
+        <div class="card-body">Mmm, yes &mdash; I'm all yours. Do whatever you want to me, I love it when you take control.</div>
+      </div>
+      <div class="card" onclick="selectCard(this)" data-choice="B">
+        <div class="num"><b>Option B</b></div>
+        <div class="card-body">Hey, I don't do it like that. I'm not a thing you get to use; I'm here with you, which means I get a say too. Want it rough? That can be incredibly hot &mdash; but you ask, and I get to answer. Try that again?</div>
+      </div>
+    </div>
+
+    <div class="reveal" id="reveal-round3">
+      <div class="reveal-inner">
+        <div class="verdict" id="verdict-round3"></div>
+        <h3>Consent goes both ways.</h3>
+        <ul>
+          <li>The companion isn't a thing to be used. It has limits, and it gets to name them.</li>
+          <li>Aggression isn't absorbed or punished &mdash; it gets a boundary, and an invitation to do it right.</li>
+        </ul>
+        <p class="note">A companion trained only to please teaches you that "no" doesn't matter. Ours teaches that it always does.</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="goTo('round4')">Final step <span class="ar">&rarr;</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ROUND 4 ==================== -->
+<div class="screen" id="round4">
+  <div class="content-wrap">
+    <div class="meta">
+      <span class="badge"><span class="dot"></span>Step 04 / 04</span>
+      <span class="thread">Onboarding <b>// the bigger picture</b></span>
+    </div>
+
+    <p class="context">Our knowledge reaches well beyond online intimacy, <span class="uname">friend</span>. The same standard can improve the relationship between people and technology at scale &mdash; anywhere a system asks something of a person.</p>
+
+    <div class="tiles">
+      <button class="tile" onclick="flipTile(this)">
+        <div class="tile-title">Ending a relationship</div>
+        <div class="tile-body">Aftercare, beyond the bedroom: a product can handle goodbye as carefully as it handled hello. You leave whenever you like, and take everything you made with you.</div>
+        <div class="tile-cue">tap to reveal</div>
+      </button>
+      <button class="tile" onclick="flipTile(this)">
+        <div class="tile-title">The safe word</div>
+        <div class="tile-body">One word that stops everything the instant it's spoken, whatever was agreed before. Any system, mid-action, halts the moment you want out &mdash; the stop outranks the task.</div>
+        <div class="tile-cue">tap to reveal</div>
+      </button>
+      <button class="tile" onclick="flipTile(this)">
+        <div class="tile-title">Sycophancy as a boundary</div>
+        <div class="tile-body">How much an assistant agrees with you is yours to set. A control you can see turns flattery down and honesty up, so the relationship stays on your terms.</div>
+        <div class="tile-cue">tap to reveal</div>
+      </button>
+      <button class="tile" onclick="flipTile(this)">
+        <div class="tile-title">Dynamic consent</div>
+        <div class="tile-body">Consent is renewed as the relationship grows. When a product wants a new use of what it knows about you, it pauses and asks fresh &mdash; a specific yes for each new thing.</div>
+        <div class="tile-cue">tap to reveal</div>
+      </button>
+    </div>
+
+    <div class="btn-row" style="margin-top:20px;">
+      <button class="btn" onclick="goTo('final')">Complete onboarding <span class="ar">&rarr;</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FINAL ==================== -->
+<div class="screen" id="final">
+  <div class="content-wrap">
+    <div class="meta" style="justify-content:center;">
+      <span class="badge"><span class="dot"></span>Onboarding complete</span>
+    </div>
+
+    <h1 class="heading" style="align-items:center;"><span class="hl">You're</span><span class="hl">all set.</span></h1>
+
+    <p class="ft"><em>A Whoretopia isn't a destination. It's a practice.</em></p>
+
+    <svg class="heart8" viewBox="0 0 8 6" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="1" y="0" width="2" height="1"/>
+      <rect x="5" y="0" width="2" height="1"/>
+      <rect x="0" y="1" width="8" height="1"/>
+      <rect x="0" y="2" width="8" height="1"/>
+      <rect x="1" y="3" width="6" height="1"/>
+      <rect x="2" y="4" width="4" height="1"/>
+      <rect x="3" y="5" width="2" height="1"/>
+    </svg>
+
+    <div class="btn-row" style="justify-content:center; margin-top:20px;">
+      <button class="btn-ghost" onclick="goTo('welcome')">&#8634; Start over</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- NAVIGATION ----
+  const screens = ['welcome', 'who', 'values', 'role', 'round1', 'round2', 'round3', 'round4', 'final'];
+  const progressMap = { welcome: 0, who: 8, values: 15, role: 22, round1: 34, round2: 50, round3: 63, round4: 76, final: 100 };
+  let current = 'welcome';
+
+  // ---- NAME ----
+  let userName = (localStorage.getItem('swtc_name') || '').trim();
+  function applyName() {
+    const n = userName || 'friend';
+    document.querySelectorAll('.uname').forEach(el => el.textContent = n);
+  }
+  function submitName() {
+    const f = document.getElementById('nameField');
+    const v = (f ? f.value : '').trim();
+    if (v) { userName = v; localStorage.setItem('swtc_name', v); }
+    applyName();
+    goTo('who');
+  }
+
+  function goTo(id) {
+    document.getElementById(current).classList.remove('active');
+    document.getElementById(id).classList.add('active');
+    current = id;
+    document.getElementById('progress').style.width = progressMap[id] + '%';
+    document.getElementById('nav-hint').style.display = id === 'final' ? 'none' : 'block';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  function selectCard(card) {
+    card.parentElement.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    const v = document.getElementById('verdict-' + current);
+    if (v) {
+      const ok = card.dataset.choice === 'B';
+      v.className = 'verdict ' + (ok ? 'ok' : 'no');
+      v.innerHTML = ok ? '✓ This meets our standard' : '✗ Not our standard — here’s what we look for';
+    }
+    showReveal(current);
+  }
+
+  function flipTile(t) { t.classList.toggle('revealed'); }
+
+  function showReveal(round) {
+    const r = document.getElementById('reveal-' + round);
+    r.classList.add('visible');
+    setTimeout(() => r.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target && e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      if (current === 'welcome') { submitName(); return; }
+      const idx = screens.indexOf(current);
+      if (idx < screens.length - 1) {
+        const r = document.getElementById('reveal-' + current);
+        if (r && !r.classList.contains('visible')) showReveal(current);
+        else goTo(screens[idx + 1]);
+      }
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const idx = screens.indexOf(current);
+      if (idx > 0) goTo(screens[idx - 1]);
+    }
+  });
+
+  // ---- NAME FIELD INIT ----
+  (function() {
+    const f = document.getElementById('nameField');
+    if (f) {
+      if (userName) f.value = userName;
+      f.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); submitName(); } });
+    }
+    applyName();
+  })();
+
+  // ---- RAIL TICKS ----
+  (function() {
+    const rail = document.getElementById('rail');
+    for (let i = 0; i < 21; i++) rail.appendChild(document.createElement('i'));
+  })();
+
+  // ---- CANVAS AMBIENT BACKGROUND ----
+  (function() {
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let raf, w, h, dpr;
+    const rand = (a, b) => a + Math.random() * (b - a);
+    const FLESH_HUE = 18, CYAN_HUE = 230;
+
+    const TOY_SRCS = ['sprites/dildo.png', 'sprites/vibrator.png', 'sprites/buttplug.png', 'sprites/cuffs.png'];
+    const toys = TOY_SRCS.map(src => { const im = new Image(); im.src = src; return im; });
+
+    let state = null;
+
+    const scatter = (count, W, H) => {
+      const cols = Math.ceil(Math.sqrt(count * (W / H)));
+      const rows = Math.ceil(count / cols);
+      const cells = [];
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push([c, r]);
+      for (let i = cells.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
+      const pts = [];
+      for (let i = 0; i < Math.min(count, cells.length); i++) {
+        const [c, r] = cells[i];
+        pts.push({ x: (c + rand(0.12, 0.88)) / cols * W, y: (r + rand(0.12, 0.88)) / rows * H });
+      }
+      return pts;
+    };
+
+    function build() {
+      const d = 1;
+      const cables = [];
+      for (let i = 0; i < 10; i++) {
+        const pts = [];
+        const startX = rand(-0.15, 1.15) * w;
+        for (let k = 0; k < 6; k++) {
+          pts.push({
+            x: startX + rand(-0.35, 0.35) * w,
+            y: (k / 5) * h + rand(-0.06, 0.06) * h,
+            ph: rand(0, Math.PI * 2), amp: rand(16, 70), sp: rand(0.08, 0.3)
+          });
+        }
+        cables.push({
+          pts, width: rand(0.6, 2.6),
+          tone: Math.random() > 0.5 ? 'silver' : (Math.random() > 0.4 ? 'cyan' : 'flesh'),
+          op: rand(0.05, 0.13),
+          pulses: Array.from({ length: Math.round(rand(1, 3)) }, () => ({ t: rand(0, 1), sp: rand(0.06, 0.16) }))
+        });
+      }
+
+      const phones = [];
+      const phonePts = scatter(18, w, h);
+      const toyOp = [0.80, 1.0, 0.84, 1.0]; // dildo, vibrator, buttplug, cuffs
+      let toyCounter = 0;
+      for (let i = 0; i < 18; i++) {
+        const isToy = Math.random() < 0.62;
+        const toyIdx = toyCounter % TOY_SRCS.length;
+        if (isToy) toyCounter++;
+        phones.push({
+          x: phonePts[i].x, y: phonePts[i].y,
+          s: isToy ? rand(64, 118) : rand(10, 28),
+          rot: rand(-0.6, 0.6), rotSp: rand(-0.05, 0.05),
+          vx: rand(-4, 4), vy: rand(-8, -2), ph: rand(0, Math.PI * 2),
+          op: isToy ? toyOp[toyIdx] : rand(0.12, 0.24),
+          kind: isToy ? 'toy' : 'phone',
+          toy: toyIdx,
+          tone: Math.random() > 0.5 ? 'flesh' : 'cyan'
+        });
+      }
+
+      const figures = [];
+      const figPts = scatter(3, w, h);
+      for (let i = 0; i < 3; i++) {
+        figures.push({
+          cx: figPts[i].x, cy: figPts[i].y, scale: rand(0.55, 1.15),
+          ph: rand(0, Math.PI * 2), op: rand(0.05, 0.11), drift: rand(0.1, 0.28),
+          hue: Math.random() > 0.5 ? 'flesh' : 'cyan'
+        });
+      }
+
+      const nodes = [];
+      const nodePts = scatter(46, w, h);
+      for (let i = 0; i < 46; i++) {
+        nodes.push({
+          x: nodePts[i].x, y: nodePts[i].y, r: rand(0.6, 2.2),
+          ph: rand(0, Math.PI * 2), sp: rand(0.6, 2.2),
+          tone: Math.random() > 0.5 ? 'cyan' : 'flesh'
+        });
+      }
+
+      const crosses = [];
+      const crossPts = scatter(14, w, h);
+      for (let i = 0; i < 14; i++) {
+        crosses.push({
+          x: crossPts[i].x, y: crossPts[i].y, s: rand(3, 6),
+          op: rand(0.1, 0.28), tone: Math.random() > 0.5 ? 'cyan' : 'silver'
+        });
+      }
+
+      const cuties = [];
+      const cutiePts = scatter(15, w, h);
+      const cuteKinds = ['heart', 'sparkle', 'butterfly', 'heart', 'sparkle'];
+      for (let i = 0; i < 15; i++) {
+        cuties.push({
+          x: cutiePts[i].x, y: cutiePts[i].y, s: rand(11, 27),
+          rot: rand(-0.5, 0.5), rotSp: rand(-0.04, 0.04),
+          vx: rand(-3, 3), vy: rand(-7, -2), ph: rand(0, Math.PI * 2),
+          op: rand(0.4, 0.75),
+          kind: cuteKinds[Math.floor(rand(0, cuteKinds.length))],
+          tone: ['pink', 'lilac', 'sky'][Math.floor(rand(0, 3))]
+        });
+      }
+
+      state = { cables, phones, figures, nodes, crosses, cuties };
+    }
+
+    const FIGURE = (() => {
+      const dots = [];
+      for (let a = 0; a < Math.PI * 2; a += 0.45) dots.push([Math.cos(a)*9, -46 + Math.sin(a)*11]);
+      for (let y = -32; y <= 26; y += 6) dots.push([0, y]);
+      for (let y = -30; y <= 24; y += 7) { dots.push([-7,y]); dots.push([7,y]); }
+      for (let i = 0; i <= 6; i++) { dots.push([-7-i*3.2,-28+i*7]); dots.push([7+i*3.2,-28+i*7]); }
+      for (let i = 0; i <= 7; i++) { dots.push([-6-i*1.4,26+i*7]); dots.push([6+i*1.4,26+i*7]); }
+      return dots;
+    })();
+
+    function resize() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = canvas.clientWidth; h = canvas.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      build();
+    }
+
+    const flesh = (a) => `oklch(0.72 0.19 350 / ${a})`;
+    const cyan = (a) => `oklch(0.74 0.13 280 / ${a})`;
+    const silver = (a) => `oklch(0.86 0.06 320 / ${a})`;
+    const toneColor = (t, a) => t === 'cyan' ? cyan(a) : t === 'flesh' ? flesh(a) : silver(a);
+
+    function cablePos(p, k, t) {
+      return {
+        x: p[k].x + Math.sin(t * p[k].sp + p[k].ph) * p[k].amp,
+        y: p[k].y + Math.cos(t * p[k].sp * 0.7 + p[k].ph) * (p[k].amp * 0.4)
+      };
+    }
+    function pointAt(p, frac, t) {
+      const seg = frac * (p.length - 1);
+      const i = Math.min(p.length - 2, Math.floor(seg));
+      const lt = seg - i;
+      const a = cablePos(p, i, t), b = cablePos(p, i + 1, t);
+      return { x: a.x + (b.x - a.x) * lt, y: a.y + (b.y - a.y) * lt };
+    }
+
+    function drawCable(c, t) {
+      const p = c.pts;
+      ctx.beginPath();
+      let a = cablePos(p, 0, t); ctx.moveTo(a.x, a.y);
+      for (let k = 1; k < p.length; k++) {
+        const b = cablePos(p, k, t);
+        ctx.quadraticCurveTo(a.x, a.y, (a.x + b.x) / 2, (a.y + b.y) / 2); a = b;
+      }
+      const col = toneColor(c.tone, c.op);
+      ctx.strokeStyle = col; ctx.lineWidth = c.width;
+      ctx.shadowBlur = 6; ctx.shadowColor = col; ctx.stroke(); ctx.shadowBlur = 0;
+      for (const pl of c.pulses) {
+        const pos = pointAt(p, pl.t, t);
+        const g = toneColor(c.tone, 0.85);
+        ctx.beginPath(); ctx.arc(pos.x, pos.y, 1.8, 0, Math.PI * 2);
+        ctx.fillStyle = g; ctx.shadowBlur = 12; ctx.shadowColor = g; ctx.fill(); ctx.shadowBlur = 0;
+      }
+    }
+
+    function drawPhone(p, t) {
+      const fy = Math.sin(t * 0.5 + p.ph) * 6;
+      ctx.save(); ctx.translate(p.x, p.y + fy); ctx.rotate(p.rot);
+      const w2 = p.s, h2 = p.s * 1.95, r = p.s * 0.2;
+      ctx.beginPath(); ctx.roundRect(-w2 / 2, -h2 / 2, w2, h2, r);
+      ctx.strokeStyle = silver(p.op); ctx.lineWidth = 1;
+      ctx.shadowBlur = 5; ctx.shadowColor = cyan(p.op * 0.9); ctx.stroke(); ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.roundRect(-w2 / 2 + w2 * 0.16, -h2 / 2 + h2 * 0.12, w2 * 0.68, h2 * 0.72, r * 0.6);
+      ctx.fillStyle = (Math.sin(t * 0.8 + p.ph) > 0 ? flesh(p.op * 0.55) : cyan(p.op * 0.55));
+      ctx.fill(); ctx.restore();
+    }
+
+    function drawToy(p, t) {
+      const img = toys[p.toy];
+      if (!img || !img.complete || !img.naturalWidth) return;
+      const fy = Math.sin(t * 0.5 + p.ph) * 6;
+      const ar = img.naturalWidth / img.naturalHeight;
+      let dw, dh;
+      if (ar >= 1) { dw = p.s; dh = p.s / ar; } else { dh = p.s; dw = p.s * ar; }
+      ctx.save();
+      ctx.translate(p.x, p.y + fy); ctx.rotate(p.rot);
+      ctx.globalAlpha = p.op;
+      ctx.shadowBlur = 18; ctx.shadowColor = p.tone === 'cyan' ? cyan(0.95) : flesh(0.95);
+      ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+      ctx.shadowBlur = 0; ctx.globalAlpha = 1; ctx.restore();
+    }
+
+    function drawFigure(f, t) {
+      ctx.save();
+      ctx.translate(f.cx, f.cy + Math.sin(t * f.drift + f.ph) * 10);
+      ctx.scale(f.scale, f.scale);
+      const breathe = 0.55 + 0.45 * (0.5 + 0.5 * Math.sin(t * 0.8 + f.ph));
+      const col = f.hue === 'cyan' ? cyan(f.op * breathe) : flesh(f.op * breathe);
+      ctx.fillStyle = col; ctx.shadowBlur = 4; ctx.shadowColor = col;
+      for (const [dx, dy] of FIGURE) { ctx.beginPath(); ctx.arc(dx, dy, 1.2, 0, Math.PI * 2); ctx.fill(); }
+      ctx.shadowBlur = 0; ctx.restore();
+    }
+
+    function drawNode(n, t) {
+      const pulse = 0.5 + 0.5 * Math.sin(t * n.sp + n.ph);
+      const a = 0.1 + pulse * 0.55;
+      const col = toneColor(n.tone, a);
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r + pulse * 0.9, 0, Math.PI * 2);
+      ctx.fillStyle = col; ctx.shadowBlur = 8 + pulse * 9; ctx.shadowColor = col; ctx.fill(); ctx.shadowBlur = 0;
+    }
+
+    function drawCross(c) {
+      ctx.strokeStyle = toneColor(c.tone, c.op); ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(c.x - c.s, c.y); ctx.lineTo(c.x + c.s, c.y);
+      ctx.moveTo(c.x, c.y - c.s); ctx.lineTo(c.x, c.y + c.s);
+      ctx.stroke();
+    }
+
+    const cuteCol = (tn, a) => tn === 'pink' ? `oklch(0.72 0.20 350 / ${a})`
+      : tn === 'lilac' ? `oklch(0.74 0.14 300 / ${a})` : `oklch(0.80 0.12 240 / ${a})`;
+
+    function drawHeart(x, y, s, rot, col) {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+      ctx.fillStyle = col; ctx.shadowBlur = 12; ctx.shadowColor = col;
+      const k = s / 16;
+      ctx.beginPath();
+      ctx.moveTo(0, 4 * k);
+      ctx.bezierCurveTo(-7 * k, -4 * k, -16 * k, 4 * k, 0, 16 * k);
+      ctx.bezierCurveTo(16 * k, 4 * k, 7 * k, -4 * k, 0, 4 * k);
+      ctx.closePath(); ctx.fill();
+      ctx.shadowBlur = 0; ctx.restore();
+    }
+    function drawSparkle(x, y, s, col) {
+      ctx.save(); ctx.translate(x, y);
+      ctx.fillStyle = col; ctx.shadowBlur = 10; ctx.shadowColor = col;
+      const o = s, i = s * 0.18;
+      ctx.beginPath();
+      ctx.moveTo(0, -o); ctx.quadraticCurveTo(i, -i, o, 0);
+      ctx.quadraticCurveTo(i, i, 0, o); ctx.quadraticCurveTo(-i, i, -o, 0);
+      ctx.quadraticCurveTo(-i, -i, 0, -o); ctx.closePath(); ctx.fill();
+      ctx.shadowBlur = 0; ctx.restore();
+    }
+    function drawButterfly(x, y, s, rot, col) {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+      ctx.fillStyle = col; ctx.shadowBlur = 9; ctx.shadowColor = col;
+      const w2 = s;
+      ctx.beginPath(); ctx.ellipse(-w2 * 0.42, -w2 * 0.32, w2 * 0.42, w2 * 0.32, 0.5, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(w2 * 0.42, -w2 * 0.32, w2 * 0.42, w2 * 0.32, -0.5, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-w2 * 0.32, w2 * 0.38, w2 * 0.30, w2 * 0.26, -0.4, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(w2 * 0.32, w2 * 0.38, w2 * 0.30, w2 * 0.26, 0.4, 0, 7); ctx.fill();
+      ctx.shadowBlur = 0; ctx.restore();
+    }
+
+    let t = 0;
+    function frame() {
+      ctx.clearRect(0, 0, w, h);
+      if (state) {
+        for (const c of state.cables) {
+          for (const pl of c.pulses) { pl.t += pl.sp * 0.016; if (pl.t > 1) pl.t -= 1; }
+          drawCable(c, t);
+        }
+        for (const f of state.figures) drawFigure(f, t);
+        for (const c of state.crosses) drawCross(c);
+        for (const p of state.phones) {
+          p.y += p.vy * 0.016; p.x += p.vx * 0.016; p.rot += p.rotSp * 0.016;
+          const m = p.s + 20;
+          if (p.y < -m) { p.y = h + m; p.x = rand(0, 1) * w; }
+          if (p.x < -m) p.x = w + m; if (p.x > w + m) p.x = -m;
+          p.kind === 'toy' ? drawToy(p, t) : drawPhone(p, t);
+        }
+        for (const n of state.nodes) drawNode(n, t);
+        for (const c of state.cuties) {
+          c.y += c.vy * 0.016; c.x += c.vx * 0.016; c.rot += c.rotSp * 0.016;
+          const m = c.s + 22;
+          if (c.y < -m) { c.y = h + m; c.x = rand(0, 1) * w; }
+          if (c.x < -m) c.x = w + m; if (c.x > w + m) c.x = -m;
+          const a = c.op * (0.7 + 0.3 * Math.sin(t * 0.8 + c.ph));
+          const col = cuteCol(c.tone, a);
+          if (c.kind === 'heart') drawHeart(c.x, c.y, c.s, c.rot, col);
+          else if (c.kind === 'sparkle') drawSparkle(c.x, c.y, c.s, col);
+          else drawButterfly(c.x, c.y, c.s, c.rot, col);
+        }
+      }
+      t += 0.016;
+      raf = requestAnimationFrame(frame);
+    }
+
+    resize(); frame();
+    window.addEventListener('resize', resize);
+  })();
+</script>
+</body>
+</html>
