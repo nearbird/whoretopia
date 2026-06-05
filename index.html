@@ -323,10 +323,11 @@
   .reveal-inner ul { list-style: none; margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
   .reveal-inner li {
     font-size: 14px; line-height: 1.65; color: var(--ink);
-    font-weight: 300; display: flex; align-items: flex-start; gap: 12px;
+    font-weight: 300; position: relative; padding-left: 22px;
   }
   .reveal-inner li::before {
-    content: "\203A"; color: var(--cyan); font-weight: 600; font-size: 16px; margin-top: -1px; flex: none;
+    content: "\203A"; color: var(--cyan); font-weight: 600; font-size: 16px;
+    position: absolute; left: 0; top: 0;
   }
 
   /* criteria comparison grid */
@@ -338,8 +339,8 @@
   .criteria-col.corp h4 { color: var(--ink-dim); }
   .criteria-col.worker h4 { color: var(--pink); }
   .criteria-col ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
-  .criteria-col li { font-size: 13.5px; line-height: 1.6; font-weight: 300; display: flex; align-items: flex-start; gap: 10px; }
-  .criteria-col li::before { content: "\203A"; font-weight: 600; font-size: 14px; flex: none; }
+  .criteria-col li { font-size: 13.5px; line-height: 1.6; font-weight: 300; position: relative; padding-left: 18px; }
+  .criteria-col li::before { content: "\203A"; font-weight: 600; font-size: 14px; position: absolute; left: 0; top: 0; }
   .criteria-col.corp li { color: var(--ink-dim); }
   .criteria-col.corp li::before { color: var(--ink-faint); }
   .criteria-col.worker li { color: var(--ink); }
@@ -478,10 +479,11 @@
   }
   .manifesto li {
     font-size: 15px; line-height: 1.75; color: var(--ink); font-weight: 300;
-    display: flex; align-items: flex-start; gap: 12px;
+    position: relative; padding-left: 22px;
   }
   .manifesto li::before {
-    content: "\203A"; color: var(--cyan); font-weight: 600; font-size: 16px; flex: none;
+    content: "\203A"; color: var(--cyan); font-weight: 600; font-size: 16px;
+    position: absolute; left: 0; top: 0;
   }
   .manifesto li strong { color: var(--pink-soft); font-weight: 500; }
   .manifesto .dim-li { color: var(--ink-dim); }
@@ -1048,7 +1050,11 @@
     current = id;
     document.getElementById('progress').style.width = progressMap[id] + '%';
     document.getElementById('nav-hint').style.display = id === 'final' ? 'none' : 'block';
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    requestAnimationFrame(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    });
   }
 
   function selectCard(card) {
