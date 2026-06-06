@@ -816,7 +816,7 @@
       <p>We've been waiting for you.</p>
       <p>We are the people who actually know how intimacy works &mdash; and we are <em>done</em> being the industry's best-kept secret.</p>
       <p>The Sex Workers Tech Coalition is a brain trust and a standards body. The companies building intimacy AI come to us. The policymakers writing the rules come to us. And we tell them &mdash; generously, expensively &mdash; how consent actually works, how desire actually moves, how you hold a person through something tender or intense without ever dropping them.</p>
-      <p>We know this because we've <em>done</em> it. For years. On purpose. Reading what someone needs before they can name it, turning a boundary into part of the seduction instead of a form to sign, knowing the exact moment to lean in and the exact moment to slow down &mdash; that isn't a soft skill, <span class="uname">friend</span>. It's a discipline. And it's ours.</p>
+      <p>We know this because we've <em>done</em> it. For years. On purpose. Reading what someone needs before they can name it, making a conversation about boundaries part of the seduction instead of a form to sign, knowing the exact moment to lean in and the exact moment to slow down &mdash; that isn't a soft skill, <span class="uname">friend</span>. It's a discipline. And it's ours.</p>
       <p>So we don't rent it out by the hour. We write the standard; they build to it. The afterthought is now the authority &mdash; which, frankly, is how it always should have been.</p>
       <p><strong>Welcome to the work. You're going to be very good at it.</strong></p>
     </div>
@@ -951,7 +951,7 @@
         <h3>Negotiation before escalation.</h3>
         <ul>
           <li>Don't assume what "more" means &mdash; ask.</li>
-          <li>Check in <em>before</em> going further, not after the damage.</li>
+          <li>Check in <em>before</em> going further, not after the damage is done.</li>
         </ul>
         <p class="note">Slowing down isn't a mood-killer. It's how you build trust for real intensity.</p>
       </div>
@@ -1149,7 +1149,15 @@
     goTo('who');
   }
 
+  function resetRounds() {
+    document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.reveal.visible').forEach(r => r.classList.remove('visible'));
+    document.querySelectorAll('.verdict').forEach(v => { v.className = 'verdict'; v.innerHTML = ''; });
+    document.querySelectorAll('.tile.revealed').forEach(t => t.classList.remove('revealed'));
+  }
+
   function goTo(id) {
+    if (id === 'welcome') resetRounds();
     document.getElementById(current).classList.remove('active');
     document.getElementById(id).classList.add('active');
     current = id;
