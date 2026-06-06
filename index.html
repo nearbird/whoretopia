@@ -369,7 +369,7 @@
     backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3);
     clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, var(--cut) 100%, 0 calc(100% - var(--cut)));
     cursor: pointer; overflow: hidden; font-family: inherit; color: inherit;
-    display: flex; flex-direction: column; gap: 14px;
+    display: grid;
     transition: transform .35s cubic-bezier(.2,.8,.2,1), background .3s, box-shadow .35s;
   }
   .tile:hover {
@@ -384,9 +384,15 @@
     margin-top: auto; font-family: 'JetBrains Mono', monospace;
     font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan);
   }
-  .tile-body { display: none; font-size: 14.5px; line-height: 1.7; color: var(--ink-dim); font-weight: 300; text-wrap: pretty; }
-  .tile.revealed .tile-body { display: block; animation: screenIn 0.4s ease; }
-  .tile.revealed .tile-cue { display: none; }
+  /* both faces share one grid cell, so the tile is always as tall as the back */
+  .tile-face {
+    grid-area: 1 / 1; display: flex; flex-direction: column; gap: 14px;
+    transition: opacity 0.15s ease;
+  }
+  .tile-back { opacity: 0; visibility: hidden; }
+  .tile.revealed .tile-front { opacity: 0; visibility: hidden; }
+  .tile.revealed .tile-back { opacity: 1; visibility: visible; }
+  .tile-text { font-size: 14.5px; line-height: 1.7; color: var(--ink-dim); font-weight: 300; text-wrap: pretty; }
 
   /* ---- TABLE ---- */
   .ownership-table {
@@ -733,6 +739,18 @@
     background: oklch(1 0 0 / 0.6); color: var(--pink); border: 1.5px solid var(--glass-edge-soft);
   }
   .contact-row.minor .val { font-size: 18px; font-weight: 600; color: var(--ink-dim); }
+
+  /* ---- STEP 04 TILE FLIP ---- */
+  .tiles { perspective: 1000px; }
+  .tile { transform-style: preserve-3d; }
+  .tile.flipping { transition: transform 0.2s ease-in-out; will-change: transform; }
+  .tile-lead {
+    display: block;
+    font-family: 'Fredoka', sans-serif; font-weight: 600;
+    font-size: clamp(20px, 2.8vw, 26px); line-height: 1.15;
+    color: var(--pink);
+  }
+  @media (prefers-reduced-motion: reduce) { .tile.revealed { animation: none; } }
 </style>
 </head>
 <body>
@@ -998,28 +1016,48 @@
       <span class="thread">Onboarding <b>// the bigger picture</b></span>
     </div>
 
-    <p class="context">Our knowledge reaches well beyond online intimacy, <span class="uname">friend</span>. The same standard can improve the relationship between people and technology at scale &mdash; anywhere a system asks something of a person.</p>
+    <p class="context">Everything you just practiced has a translation, <span class="uname">friend</span>. What sex workers know about consent, boundaries, and care is exactly what technology keeps getting wrong. Here's how four of those skills map onto how any product should treat the people who use it. Flip each one.</p>
 
     <div class="tiles">
       <button class="tile" onclick="flipTile(this)">
-        <div class="tile-title">Ending a relationship</div>
-        <div class="tile-body">Aftercare, beyond the bedroom: a product can handle goodbye as carefully as it handled hello. You leave whenever you like, and take everything you made with you.</div>
-        <div class="tile-cue">tap to reveal</div>
+        <div class="tile-face tile-front">
+          <div class="tile-title">Ending a relationship</div>
+          <div class="tile-cue">tap to flip</div>
+        </div>
+        <div class="tile-face tile-back">
+          <b class="tile-lead">Account deletion.</b>
+          <p class="tile-text">Aftercare, beyond the bedroom: a product handles a goodbye as carefully as it handled the hello. Leave whenever you want, take everything you made, and know it's actually gone.</p>
+        </div>
       </button>
       <button class="tile" onclick="flipTile(this)">
-        <div class="tile-title">The safe word</div>
-        <div class="tile-body">One word that stops everything the instant it's spoken, whatever was agreed before. Any system, mid-action, halts the moment you want out &mdash; the stop outranks the task.</div>
-        <div class="tile-cue">tap to reveal</div>
+        <div class="tile-face tile-front">
+          <div class="tile-title">The safe word</div>
+          <div class="tile-cue">tap to flip</div>
+        </div>
+        <div class="tile-face tile-back">
+          <b class="tile-lead">Kill switch.</b>
+          <p class="tile-text">One word ends everything the instant it's spoken. Say "stop" and Alexa should actually stop listening; any system halts mid-action the moment the word lands.</p>
+        </div>
       </button>
       <button class="tile" onclick="flipTile(this)">
-        <div class="tile-title">Sycophancy as a boundary</div>
-        <div class="tile-body">How much an assistant agrees with you is yours to set. A control you can see turns flattery down and honesty up, so the relationship stays on your terms.</div>
-        <div class="tile-cue">tap to reveal</div>
+        <div class="tile-face tile-front">
+          <div class="tile-title">Boundary setting</div>
+          <div class="tile-cue">tap to flip</div>
+        </div>
+        <div class="tile-face tile-back">
+          <b class="tile-lead">Sycophancy controls.</b>
+          <p class="tile-text">An assistant that only tells you what you want to hear isn't safe. Make agreement something you set: flattery down, honesty up.</p>
+        </div>
       </button>
       <button class="tile" onclick="flipTile(this)">
-        <div class="tile-title">Dynamic consent</div>
-        <div class="tile-body">Consent is renewed as the relationship grows. When a product wants a new use of what it knows about you, it pauses and asks fresh &mdash; a specific yes for each new thing.</div>
-        <div class="tile-cue">tap to reveal</div>
+        <div class="tile-face tile-front">
+          <div class="tile-title">Dynamic consent</div>
+          <div class="tile-cue">tap to flip</div>
+        </div>
+        <div class="tile-face tile-back">
+          <b class="tile-lead">Re-asking permission.</b>
+          <p class="tile-text">Consent isn't one signature at the door; it's renewed as things change. When a product wants a new use of what it knows about you, it asks fresh.</p>
+        </div>
       </button>
     </div>
 
@@ -1136,7 +1174,25 @@
     showReveal(current);
   }
 
-  function flipTile(t) { t.classList.toggle('revealed'); }
+  function flipTile(t) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      t.classList.toggle('revealed');
+      return;
+    }
+    if (t.dataset.flipping) return;
+    t.dataset.flipping = '1';
+    t.classList.add('flipping');
+    t.style.transform = 'rotateY(90deg)';      // turn front away to edge
+    setTimeout(() => {
+      t.classList.toggle('revealed');          // swap faces while invisible
+      t.style.transform = 'rotateY(0deg)';     // bring new face in
+      setTimeout(() => {
+        t.classList.remove('flipping');
+        t.style.transform = '';
+        delete t.dataset.flipping;
+      }, 220);
+    }, 200);
+  }
 
   function showReveal(round) {
     const r = document.getElementById('reveal-' + round);
@@ -1189,6 +1245,25 @@
 
     const TOY_SRCS = ['sprites/dildo.png', 'sprites/vibrator.png', 'sprites/buttplug.png', 'sprites/cuffs.png'];
     const toys = TOY_SRCS.map(src => { const im = new Image(); im.src = src; return im; });
+
+    // The sprites are near-white outline art; recolor them per tone so the
+    // contours actually read against the light background. Cached per toy+tone.
+    const tintCache = {};
+    function tintedToy(idx, color) {
+      const key = idx + '|' + color;
+      if (tintCache[key]) return tintCache[key];
+      const img = toys[idx];
+      if (!img || !img.complete || !img.naturalWidth) return null;
+      const oc = document.createElement('canvas');
+      oc.width = img.naturalWidth; oc.height = img.naturalHeight;
+      const octx = oc.getContext('2d');
+      octx.drawImage(img, 0, 0);
+      octx.globalCompositeOperation = 'source-in';
+      octx.fillStyle = color;
+      octx.fillRect(0, 0, oc.width, oc.height);
+      tintCache[key] = oc;
+      return oc;
+    }
 
     let state = null;
 
@@ -1364,6 +1439,8 @@
     function drawToy(p, t) {
       const img = toys[p.toy];
       if (!img || !img.complete || !img.naturalWidth) return;
+      const tinted = tintedToy(p.toy, p.tone === 'cyan' ? cyan(1) : flesh(1));
+      if (!tinted) return;
       const fy = Math.sin(t * 0.5 + p.ph) * 6;
       const ar = img.naturalWidth / img.naturalHeight;
       let dw, dh;
@@ -1372,7 +1449,7 @@
       ctx.translate(p.x, p.y + fy); ctx.rotate(p.rot);
       ctx.globalAlpha = p.op;
       ctx.shadowBlur = 18; ctx.shadowColor = p.tone === 'cyan' ? cyan(0.95) : flesh(0.95);
-      ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+      ctx.drawImage(tinted, -dw / 2, -dh / 2, dw, dh);
       ctx.shadowBlur = 0; ctx.globalAlpha = 1; ctx.restore();
     }
 
